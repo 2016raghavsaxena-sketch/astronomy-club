@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Astronomy Club</title>
+  <meta name="description" content="Astronomy Club — online meetups every two weeks. Free to join." />
+  <meta property="og:title" content="Astronomy Club" />
+  <meta property="og:description" content="Online stargazing meetups, talks, and community. Free membership." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+  <link rel="preload" href="assets/styles.css" as="style">
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#hero" aria-label="Astronomy Club home">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">Astronomy Club</span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <button id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="navMenu" aria-label="Toggle menu">☰</button>
+        <ul id="navMenu" class="nav-list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#fact">Space Fact</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#gallery">Gallery</a></li>
+          <li><a href="#resources">Resources</a></li>
+          <li><a href="#join">Join</a></li>
+          <li><a href="#contact" class="btn btn--small">Contact</a></li>
+        </ul>
+      </nav>
+
+      <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <main id="main">
+    <section id="hero" class="hero" role="region" aria-label="Hero">
+      <div class="container hero-inner">
+        <h1>Explore the night sky with us</h1>
+        <p>Online meetups every two weeks: star parties, short talks, and friendly Q&A. Free to join.</p>
+        <div class="hero-cta">
+          <a href="#events" class="btn">See Upcoming Events</a>
+          <a href="#join" class="btn btn--ghost">Become a Member</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Space Fact of the Week -->
+    <section id="fact" class="section section--tinted" aria-labelledby="fact-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="fact-title">Space Fact of the Week</h2>
+        <p class="muted" id="fact-week-label"></p>
+        </div>
+        <article id="fact-card" class="card" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container grid grid--2">
+        <div>
+          <h2>About the club</h2>
+          <p>We’re a volunteer-run online community of stargazers, students, and space enthusiasts. We host regular virtual observations, workshops, and guest talks.</p>
+          <ul class="checklist">
+            <li>Online every 2 weeks</li>
+            <li>Guest micro-lectures</li>
+            <li>Beginner-friendly</li>
+            <li>Membership: Free</li>
+          </ul>
+        </div>
+        <div>
+          <figure class="card">
+            <img src="https://images-assets.nasa.gov/image/2024_1108_perseids/2024_1108_perseids~orig.jpg" alt="Perseid meteor streak over dark sky" loading="lazy" />
+            <figcaption class="muted">Perseid meteor — NASA (public domain).</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="events" class="section section--tinted">
+      <div class="container">
+        <div class="section-head">
+          <h2>Upcoming events</h2>
+          <div class="controls" style="display:flex; gap:.5rem; flex-wrap:wrap">
+            <label for="eventFilter" class="sr-only">Filter by tag</label>
+            <select id="eventFilter" aria-label="Filter events">
+              <option value="all">All</option>
+              <option value="star-party">Star Party</option>
+              <option value="talk">Talk</option>
+              <option value="workshop">Workshop</option>
+              <option value="outreach">Outreach</option>
+              <option value="online">Online</option>
+            </select>
+            <button id="exportIcs" class="btn btn--small" type="button" title="Export upcoming events as iCal">Export iCal</button>
+            <button id="openEditor" class="btn btn--small" type="button" title="Manage events locally (admin)">🔒 Manage Events (local)</button>
+          </div>
+        </div>
+        <div id="eventsList" class="cards-grid" aria-live="polite"></div>
+        <details class="past-events">
+          <summary>Past highlights</summary>
+          <div id="pastEventsList" class="cards-grid"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Events Editor Modal -->
+    <div id="editorModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="editorTitle">
+      <div class="modal-content card">
+        <div class="modal-header">
+          <h3 id="editorTitle">Events Editor (local draft)</h3>
+          <button id="closeEditor" class="modal-close" aria-label="Close editor">✕</button>
+        </div>
+
+        <div class="modal-actions" style="display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem">
+          <input type="file" id="importFile" accept=".json" aria-label="Import events JSON" />
+          <button id="downloadJson" class="btn btn--small" type="button" title="Download events.json">Download JSON</button>
+          <button id="clearDraft" class="btn btn--small" type="button" title="Clear local draft">Clear Draft</button>
+        </div>
+
+        <form id="eventForm" class="form" novalidate>
+          <div class="grid grid--3">
+            <label>Title
+              <input required name="title" placeholder="Event title" />
+            </label>
+            <label>Date & time
+              <input required type="datetime-local" name="date" />
+            </label>
+            <label>Location
+              <input name="location" placeholder="Virtual or place" />
+            </label>
+          </div>
+          <label>Tags (comma-separated)
+            <input name="tags" placeholder="online, workshop" />
+          </label>
+          <label>Blurb
+            <textarea name="blurb" rows="3" placeholder="Short description"></textarea>
+          </label>
+          <label>Details link
+            <input name="link" placeholder="https://…" />
+          </label>
+          <div style="display:flex; gap:.5rem; flex-wrap:wrap">
+            <button class="btn btn--small" type="submit">Add / Update</button>
+            <span class="muted" id="formMsg" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <div class="table-wrap">
+          <table class="events-table" aria-label="Events list">
+            <thead>
+              <tr>
+                <th>Title</th><th>Date</th><th>Location</th><th>Tags</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="editorRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <section id="gallery" class="section">
+      <div class="container">
+        <h2>Gallery</h2>
+        <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
+
+        <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+          <button class="lightbox-close" aria-label="Close">✕</button>
+          <img class="lightbox-img" alt="" />
+          <p class="lightbox-caption"></p>
+          <div class="lightbox-arrows" aria-hidden="true">
+            <button class="prev" aria-label="Previous">←</button>
+            <button class="next" aria-label="Next">→</button>
+          </div>
+        </div>
+
+        <p class="muted" style="margin-top:1rem">
+          Image credits: NASA / ESA / ESO — public domain or permissive use per linked sources.
+        </p>
+      </div>
+    </section>
+
+    <section id="resources" class="section section--tinted">
+      <div class="container grid grid--3">
+        <article class="card">
+          <h3>Beginner’s Toolkit</h3>
+          <p>Choosing your first telescope, apps for the sky, and how to read a star chart.</p>
+          <a class="btn btn--small" href="https://stellarium.org/" target="_blank" rel="noopener">Stellarium</a>
+        </article>
+        <article class="card">
+          <h3>Observation Sites</h3>
+          <p>Dark-sky locations and light-pollution maps for planning sessions.</p>
+          <a class="btn btn--small" href="https://www.lightpollutionmap.info/" target="_blank" rel="noopener">Light Pollution Map</a>
+        </article>
+        <article class="card">
+          <h3>Astro Photography</h3>
+          <p>Camera settings, stacking, and post-processing basics.</p>
+          <a class="btn btn--small" href="https://autostakkert.com/" target="_blank" rel="noopener">AutoStakkert!</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="join" class="section">
+      <div class="container grid grid--2">
+        <div>
+          <h2>Join the club</h2>
+          <p>Membership is free. Add your email to get meeting links for our biweekly online sessions.</p>
+          <ul class="checklist">
+            <li>Cadence: Online every 2 weeks</li>
+            <li>Cost: Free</li>
+            <li>All experience levels welcome</li>
+          </ul>
+        </div>
+        <form id="newsletterForm" class="card form" novalidate>
+          <h3>Newsletter signup</h3>
+          <label>Email
+            <input required type="email" name="email" placeholder="you@example.com" autocomplete="email" />
+          </label>
+          <label>Interests
+            <select name="interest">
+              <option value="events">Events</option>
+              <option value="astrophotography">Astrophotography</option>
+              <option value="science">Science talks</option>
+              <option value="outreach">Outreach</option>
+            </select>
+          </label>
+          <button class="btn" type="submit">Subscribe</button>
+          <p class="form-msg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section id="contact" class="section section--tinted">
+      <div class="container grid grid--2">
+        <div>
+          <h2>Contact</h2>
+          <p>Email us at <a id="contactEmail" href="mailto:2016raghav.saxena@gmail.com">2016raghav.saxena@gmail.com</a> or use the form.</p>
+          <p class="muted">We usually reply within 2–3 days.</p>
+        </div>
+        <form id="contactForm" class="card form" novalidate>
+          <label>Name
+            <input required name="name" placeholder="Your name" />
+          </label>
+          <label>Email
+            <input required type="email" name="email" placeholder="you@example.com" />
+          </label>
+          <label>Message
+            <textarea required name="message" rows="5" placeholder="How can we help?"></textarea>
+          </label>
+          <button class="btn" type="submit">Send</button>
+          <p class="form-msg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> Astronomy Club</p>
+      <ul class="social"></ul>
+    </div>
+  </footer>
+
+  <script defer src="assets/app.js"></script>
+</body>
+</html>
